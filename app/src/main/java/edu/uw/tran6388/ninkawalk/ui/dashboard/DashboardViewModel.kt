@@ -8,7 +8,6 @@ class DashboardViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "Welcome!!!"
-        //value = "This is test"
     }
     val text: LiveData<String> = _text
 }
