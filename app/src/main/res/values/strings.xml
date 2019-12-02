@@ -1,13 +1,8 @@
 <resources>
     <string name="app_name">NinKaWalk</string>
     <string name="title_home">Home</string>
-<<<<<<< HEAD
     <string name="title_dashboard">Shop</string>
     <string name="title_notifications">Collection</string>
-=======
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="pokemon_list">https://pokeapi.co/api/v2/pokemon/</string>
     <string name="pokemon_image">https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png</string>
->>>>>>> c56c92ab8401738357afa751e60f926e52a005c9
 </resources>
