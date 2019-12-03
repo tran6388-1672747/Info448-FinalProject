@@ -13,11 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.AuthFailureError
 import edu.uw.tran6388.ninkawalk.R
@@ -27,6 +30,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.*
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import edu.uw.tran6388.ninkawalk.MainActivity
 import edu.uw.tran6388.ninkawalk.ui.Pokemon
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
@@ -37,6 +41,11 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.one_pokemon_list.view.*
+import kotlinx.android.synthetic.main.pokemon_list.*
+import com.squareup.picasso.Picasso
+import org.w3c.dom.Text
 
 // The helper class to be call when creating adapter.
 class Hepler {
@@ -46,7 +55,7 @@ class Hepler {
         //kotlin
         //instantiate the image loader (from Kotlin docs)
         //params are the requestQueue and the Cache
-        /*val imageLoader: ImageLoader by lazy { //only instantiate when needed
+        val imageLoader: ImageLoader by lazy { //only instantiate when needed
             ImageLoader(queue,
                 object : ImageLoader.ImageCache { //anonymous cache object
                     private val cache = LruCache<String, Bitmap>(20)
@@ -57,7 +66,7 @@ class Hepler {
                         cache.put(url, bitmap)
                     }
                 })
-        }*/
+        }
 
         fun dataRequestQueue(context: Context): RequestQueue? {
             queue = Volley.newRequestQueue(context)
@@ -70,9 +79,10 @@ class Hepler {
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
-    private val listOfPokemon = mutableListOf<Pokemon>()
+    private var listOfPokemon = mutableListOf<Pokemon>()
     private val listOfPokemonName = mutableListOf<String>()
     private var queue: RequestQueue? = null
+    private val twoPane = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,53 +92,52 @@ class DashboardFragment : Fragment() {
         dashboardViewModel =
             ViewModelProviders.of(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
+        //val textView: TextView = root.findViewById(R.id.text_dashboard)
         /*dashboardViewModel.text.observe(this, Observer {
             textView.text = it
         })*/
 
 
-
-
-
         val context = getActivity()?.getApplicationContext() as Context
         queue = Hepler.dataRequestQueue(context)
 
-        getListOfPokemonName(textView)
-        //getListOfPokemon(textView)
+        val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list);
+
+        getListOfPokemonName(recyclerView)
 
         return root
     }
 
-    private fun getListOfPokemonName(textView: TextView) {
+    private fun getListOfPokemonName(recyclerView: RecyclerView) {
         val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokedex=all"
 
         // Request a string response from the provided URL.
         val stringReq = StringRequest(Request.Method.GET, url,
             Response.Listener<String> { response ->
 
+
                 val separated = response.split("\n")
 
-                for (i in 0..separated.size) {
-                    val onePokemon = separated[0].split(":")
+                for (i in 0..separated.size-1) {
+                    val onePokemon = separated[i].split(":")
                     listOfPokemonName.add(onePokemon[1])
                 }
 
-
-
-                getListOfPokemon(textView, listOfPokemonName[0])
+                val i = 0
+                getPokemon(recyclerView, i)
             },
             Response.ErrorListener { error ->
-                textView.text = error.toString()
+                //textView.text = error.toString()
+                Log.v("Error PokemonName:", error.toString())
             }
         )
         queue?.add(stringReq)
     }
 
-    private fun getListOfPokemon(textView: TextView, pokemonName: String) {
+    private fun getPokemon(recyclerView: RecyclerView, index: Int) {
 
         // making a API call information for one pokemon.
-        val url2 = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokemon=" + pokemonName
+        val url2 = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokemon=" + listOfPokemonName[index]
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.GET, url2, null,
             Response.Listener { response ->
@@ -144,12 +153,27 @@ class DashboardFragment : Fragment() {
                 // Create the adapter to convert the array to views
                 //recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, list, twoPane)
 
-                textView.text = response.toString()
+                //val x = response.getJSONObject("images").getString("photo").split("/")
 
+                //textView.text = x[1]
 
+                val pokemon = parseForOnePokemon(response)
+                listOfPokemon.add(pokemon)
+
+                /*Log.v("index", index.toString())
+                Log.v("listOfPokemon", listOfPokemon[index].name)
+                Log.v("listOfPokemon", listOfPokemon[index].description)*/
+
+                if (index < 10) {
+                    getPokemon(recyclerView, index + 1)
+                } else if (index == 10) {
+                    // Create the adapter to convert the array to views
+                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane)
+                }
             },
             Response.ErrorListener { error ->
-                textView.text = error.toString()
+                //textView.text = error.toString()
+                Log.v("Error Pokemon:", error.toString())
             }
         )
         queue?.add(jsonObjectRequest)
@@ -161,89 +185,38 @@ class DashboardFragment : Fragment() {
      * Parses the query response from the News API aggregator
      * https://newsapi.org/
      */
-    /*fun parseForOnePokemon(response: JSONObject): Pokemon {
+    fun parseForOnePokemon(response: JSONObject): Pokemon {
 
-        //val stories = mutableListOf<Pokemon>()
+        val name = response.getString("name")
+        val hp = response.getInt("hp").toString()
 
-        //val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        val infoJSON = response.getJSONObject("info")
+        val id = infoJSON.getInt("id").toString()
+        val type = infoJSON.getString("type")
+        val weakness = infoJSON.getString("weakness")
+        val description = infoJSON.getString("description")
 
-        try {
-            val jsonArticles = response.getJSONArray("articles") //response.articles
+        val image = response.getJSONObject("images").getString("photo").split("/")
+        val imageURL = image[1].split(".")[0] + ".png"
 
-            for (i in 0 until Math.min(jsonArticles.length(), 20)) { //stop at 20
-                val articleItemObj = jsonArticles.getJSONObject(i)
-
-                //handle image url
-                var imageUrl:String? = articleItemObj.getString("urlToImage")
-                if (imageUrl == "null" || !URLUtil.isValidUrl(imageUrl)) {
-                    imageUrl = null //make actual null value
-                }
-
-                //handle date
-                val publishedTime = try {
-                    val pubDateString = articleItemObj.getString("publishedAt")
-                    if(pubDateString != "null")
-                        formatter.parse(pubDateString).time
-                    else
-                        0L //return 0
-                } catch (e: ParseException) {
-                    Log.e("Pokemon JSONOject: ", "Error parsing date", e) //Android log the error
-                    0L //return 0
-                }
-
-                //access source
-                val sourceObj = articleItemObj.getJSONObject("source")
-
-                val story = Pokemon(
-                    headline = articleItemObj.getString("title"),
-                    webUrl = articleItemObj.getString("url"),
-                    description = articleItemObj.getString("description"),
-                    imageUrl = imageUrl,
-                    publishedTime = publishedTime,
-                    sourceId = sourceObj.getString("id"),
-                    sourceName = sourceObj.getString("name")
-                )
-
-                stories.add(story)
-            } //end for loop
-        } catch (e: JSONException) {
-            Log.e("Pokemon JSONObject", "Error parsing json", e) //Android log the error
-        }
-
-        return stories
-    }*/
-
-    // pass the request with the url and recyclerview to get back the json list.
-    private fun setupRecyclerView(recyclerView: RecyclerView, url: String, context: Context) {
-
-        //val queue = Hepler.dataRequestQueue(getActivity()?.getApplicationContext())
-
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.GET, url, null,
-            Response.Listener { response ->
-
-                //val list = DummyContent.parseNewsAPI(response)
-
-                // Set the grid column to 2 for small scene.
-                /*if (!twoPane) {
-                    val numberOfColumns = 2;
-                    recyclerView.setLayoutManager(GridLayoutManager(this, numberOfColumns))
-                }*/
-
-                // Create the adapter to convert the array to views
-                //recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, list, twoPane)
-            },
-            Response.ErrorListener { error ->
-                print(error.toString())
-            }
+        val pokemon = Pokemon(
+            name = name,
+            description = description,
+            id = id,
+            hp = hp,
+            type = type,
+            weakness = weakness,
+            imageURL = imageURL
         )
-        //queue?.add(jsonObjectRequest)
+
+        return pokemon
     }
 
+
     // Create the adapter.
-    /*class SimpleItemRecyclerViewAdapter(
-        private val parentActivity: ItemListActivity,
-        private val values: List<DummyContent.NewsArticle>,
+    class SimpleItemRecyclerViewAdapter(
+        private val parentActivity: FragmentActivity,
+        private val values: List<Pokemon>,
         private val twoPane: Boolean
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
@@ -258,7 +231,7 @@ class DashboardFragment : Fragment() {
 
         // method to be call by onclickListener to set listener for each fragment.
         private fun showDetailsView(v: View) {
-            val item = v.tag as DummyContent.NewsArticle
+            val item = v.tag as Pokemon
             if (twoPane) {
 
                 // This is for passing the item
@@ -275,50 +248,56 @@ class DashboardFragment : Fragment() {
                     .commit()*/
 
                 // This is for extra credit.
-                val frag = ItemDetailFragment.newInstance(item.headline,
+                /*val frag = ItemDetailFragment.newInstance(item.headline,
                     item.description, item.sourceName)
 
                 parentActivity.supportFragmentManager.beginTransaction()
                     .replace(R.id.item_detail_container, frag)
                     .addToBackStack(null)
-                    .commit()
+                    .commit()*/
 
             } else {
-                val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
+                /*val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
                     putExtra("item_frag", item)
                 }
-                v.context.startActivity(intent)
+                v.context.startActivity(intent)*/
             }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_list_content, parent, false)
+                .inflate(R.layout.one_pokemon_list, parent, false)
             return ViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
 
-            val url = item.imageUrl
+            val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/sprites/" + item.imageURL
 
-            holder.cardImage.setImageUrl(url, DummyContent.Hepler.imageLoader)
+            /*holder.cardImage.setImageUrl(url, Hepler.imageLoader)
             holder.cardImage.setDefaultImageResId(R.drawable.broken_links)
-            holder.cardImage.setErrorImageResId(R.drawable.broken_links)
+            holder.cardImage.setErrorImageResId(R.drawable.broken_links)*/
 
-            holder.headline.text = item.headline
+            //Log.v("image url: ", url)
 
-            with(holder.itemView) {
+            Picasso.get().load(url).into(holder.cardImage)
+
+            holder.name.text = item.name
+            holder.cost.text = "Cost: " + (item.id.toInt() * 100).toString() + " points."
+
+            /*with(holder.itemView) {
                 tag = item
                 setOnClickListener(onClickListener)
-            }
+            }*/
         }
 
         override fun getItemCount() = values.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val cardImage: NetworkImageView = view.card_view_image
-            val headline: TextView = view.card_view_headline
+            val cardImage: ImageView = view.view_image
+            val name: TextView = view.view_name
+            val cost: TextView = view.view_cost
         }
-    }*/
+    }
 }

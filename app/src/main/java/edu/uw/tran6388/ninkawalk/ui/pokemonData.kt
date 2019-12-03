@@ -10,8 +10,10 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class Pokemon(
     val name: String,
-    val level: String,
-    val cost: Int,
     val description: String,
-    val imageUrl: String
+    val id: String,
+    val hp: String,
+    val type:String,
+    val weakness: String,
+    val imageURL: String
 ) : Parcelable
