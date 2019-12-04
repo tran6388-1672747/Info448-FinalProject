@@ -1,5 +1,6 @@
 package edu.uw.tran6388.ninkawalk.ui.home
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,11 +16,19 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
+import edu.uw.tran6388.ninkawalk.MainActivity
+import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeFragment : Fragment(), SensorEventListener {
+
+
+class HomeFragment : Fragment() {
 
     private lateinit var homeViewModel: HomeViewModel
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,33 +42,9 @@ class HomeFragment : Fragment(), SensorEventListener {
         homeViewModel.text.observe(this, Observer {
             textView.text = it
         })
+        var steps = (activity as MainActivity).steps
+        if(steps != null)
+            root.findViewById<TextView>(R.id.step_counter).setText("$steps STEPS")
         return root
-    }
-
-    override fun onResume() {
-        super.onResume()
-        running = true
-        var stepsSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
-        if (stepsSensor == null) {
-            Toast.makeText(this, "No Step Counter Sensor !", Toast.LENGTH_SHORT).show()
-        } else {
-            sensorManager?.registerListener(this, stepsSensor, SensorManager.SENSOR_DELAY_UI)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        running = false
-        sensorManager?.unregisterListener(this)
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-    }
-
-    override fun onSensorChanged(event: SensorEvent) {
-        if (running) {
-            stepsValue.setText("" + event.values[0])
-        }
     }
 }

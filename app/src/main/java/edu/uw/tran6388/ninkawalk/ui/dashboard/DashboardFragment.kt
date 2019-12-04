@@ -102,7 +102,9 @@ class DashboardFragment : Fragment() {
         queue = Hepler.dataRequestQueue(context)
 
         val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list);
-
+        var steps = (activity as MainActivity).steps
+        if(steps != null)
+            root.findViewById<TextView>(R.id.number_of_points).setText("$steps STEPS")
         getListOfPokemonName(recyclerView)
 
         return root
