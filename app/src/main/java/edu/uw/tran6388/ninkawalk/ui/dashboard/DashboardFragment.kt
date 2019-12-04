@@ -91,6 +91,8 @@ class DashboardFragment : Fragment() {
 
         totalPoint = 1000
 
+        //Log.v("onCreateView: ", "in the shop fragment")
+
         return root
     }
 
@@ -185,10 +187,6 @@ class DashboardFragment : Fragment() {
         var steps = (activity as MainActivity).steps
         number_of_points.setText("$steps Steps")
     }
-
-
-
-
 
     /**
      * Parses the query response from the News API aggregator
