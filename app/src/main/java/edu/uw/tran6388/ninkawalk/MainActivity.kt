@@ -1,5 +1,6 @@
 package edu.uw.tran6388.ninkawalk
 
+import android.app.Service
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -21,6 +22,18 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import edu.uw.tran6388.ninkawalk.ui.home.HomeFragment
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlin.math.roundToInt
+import android.content.Intent
+import android.os.IBinder
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
+
+
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 

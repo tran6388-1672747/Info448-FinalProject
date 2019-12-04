@@ -10,4 +10,14 @@ class HomeViewModel : ViewModel() {
         value = "Walk to buy cool stuff from the shop!"
     }
     val text: LiveData<String> = _text
+
+    private var totalPoint = 1000
+
+    fun addPoints(pointsToAdd: Int) {
+        totalPoint = totalPoint + pointsToAdd
+    }
+
+    fun deletePoint(pointsToDelete: Int) {
+        totalPoint = totalPoint - pointsToDelete
+    }
 }

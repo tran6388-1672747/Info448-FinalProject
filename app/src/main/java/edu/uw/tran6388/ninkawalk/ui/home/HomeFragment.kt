@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.fragment_home.*
 
 import edu.uw.tran6388.ninkawalk.MainActivity
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlin.math.roundToInt
 
 
 class HomeFragment : Fragment() {

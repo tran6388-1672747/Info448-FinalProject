@@ -18,6 +18,12 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
+        android:id="@+id/navigation_detail"
+        android:name="edu.uw.tran6388.ninkawalk.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_pokemon_detail" />
+
+    <fragment
         android:id="@+id/navigation_notifications"
         android:name="edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
