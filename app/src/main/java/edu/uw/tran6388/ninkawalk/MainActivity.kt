@@ -10,12 +10,17 @@ import android.util.Log
 import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import edu.uw.tran6388.ninkawalk.ui.home.HomeFragment
+import kotlinx.android.synthetic.main.fragment_home.*
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
@@ -24,6 +29,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var totalPoints: String? = "0"
     //private var query: String? = ""
     private val QUERY_STRING: String = "search query"
+    var steps = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +45,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        var context = Context.SENSOR_SERVICE
+        sensorManager = getSystemService(context) as SensorManager
         navView.setupWithNavController(navController)
-        findViewById<TextView>(R.id.text_display).text = "0"
+        //findViewById<TextView>(R.id.text_display).text = "0"
         //text_display.text = "0"
     }
 
@@ -50,13 +59,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onResume() {
-
         super.onResume()
         running = true
+        Log.d("onResume", "START")
         var stepsSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         if (stepsSensor == null) {
-            //Toast.makeText(this, "No Step Counter Sensor !", Toast.LENGTH_SHORT).show()
+            Log.d("onResume", "No Step Counter Sensor !")
         } else {
             sensorManager?.registerListener(this, stepsSensor, SensorManager.SENSOR_DELAY_UI)
         }
@@ -72,9 +81,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+        Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
-            text_display.text = "" + event.values[0].toInt()
-            totalPoints = event.values[0].toInt().toString()
+            Log.d("onSensorChanged", "Updating Steps")
+            steps = event.values[0].roundToInt()
         }
     }
 
