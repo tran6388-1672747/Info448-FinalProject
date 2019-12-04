@@ -83,6 +83,8 @@ class DashboardFragment : Fragment() {
         getListOfPokemonName(recyclerView)
 
 
+        //Log.v("onCreateView: ", "in the shop fragment")
+
         return root
     }
 
@@ -165,10 +167,6 @@ class DashboardFragment : Fragment() {
         number_of_points.setText("$steps Steps")
         (activity as MainActivity).previousSteps = steps
     }
-
-
-
-
 
     /**
      * Parses the query response from the News API aggregator

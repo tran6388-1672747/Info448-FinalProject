@@ -34,10 +34,10 @@ import android.os.ResultReceiver
 
 import androidx.lifecycle.ViewModelProviders
 import edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsViewModel
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
+import android.R.id.edit
+import android.content.SharedPreferences
+import com.google.android.gms.tasks.Task
+import com.google.gson.Gson
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -111,5 +111,33 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val mPrefs = getPreferences(Context.MODE_PRIVATE)
+
+        val gson = Gson()
+        val json = mPrefs.getString("collection_list", "")
+        val notificationsViewModel2 = gson.fromJson<NotificationsViewModel>(json, NotificationsViewModel::class.java!!)
+
+        if (notificationsViewModel2 == null) {
+            Log.v("notificationView", "null")
+        } else {
+            notificationsViewModel = notificationsViewModel2
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val mPrefs = getPreferences(Context.MODE_PRIVATE)
+
+        val prefsEditor = mPrefs.edit();
+        val gson = Gson()
+        val json = gson.toJson(notificationsViewModel)
+        prefsEditor.putString("collection_list", json);
+        prefsEditor.commit()
     }
 }
