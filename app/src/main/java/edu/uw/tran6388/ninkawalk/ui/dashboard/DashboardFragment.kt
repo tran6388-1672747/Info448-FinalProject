@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
@@ -32,6 +33,8 @@ import kotlinx.android.synthetic.main.one_pokemon_list.view.*
 import com.squareup.picasso.Picasso
 import edu.uw.tran6388.ninkawalk.DetailActivity
 import edu.uw.tran6388.ninkawalk.MainActivity
+import edu.uw.tran6388.ninkawalk.ui.ModelStore
+import edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsViewModel
 
 // The helper class to be call when creating adapter.
 class Hepler {
@@ -49,10 +52,13 @@ class Hepler {
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
+    private lateinit var notificationViewModel: NotificationsViewModel
     private var listOfPokemon = mutableListOf<Pokemon>()
     private val listOfPokemonName = mutableListOf<String>()
     private var queue: RequestQueue? = null
     private val twoPane = false
+    private var totalPoint = 0
+    lateinit var notificationsViewModel: NotificationsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,6 +67,14 @@ class DashboardFragment : Fragment() {
     ): View? {
         dashboardViewModel =
             ViewModelProviders.of(this).get(DashboardViewModel::class.java)
+
+        /*notificationViewModel =
+            ViewModelProviders.of(this).get(NotificationsViewModel::class.java)*/
+
+        //modelStore = ModelStore()
+
+        notificationsViewModel = (activity as MainActivity).notificationsViewModel
+
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
         //val textView: TextView = root.findViewById(R.id.text_dashboard)
         /*dashboardViewModel.text.observe(this, Observer {
@@ -79,6 +93,8 @@ class DashboardFragment : Fragment() {
         if(steps != null)
             root.findViewById<TextView>(R.id.number_of_points).setText("$steps STEPS")
         getListOfPokemonName(recyclerView)
+
+        totalPoint = 1000
 
         return root
     }
@@ -139,13 +155,14 @@ class DashboardFragment : Fragment() {
                 Log.v("listOfPokemon", listOfPokemon[index].name)
                 Log.v("listOfPokemon", listOfPokemon[index].description)*/
 
-                Log.v("current acivity: ", getActivity().toString())
+                //Log.v("current acivity: ", getActivity().toString())
 
                 if (index < 10) {
                     getPokemon(recyclerView, index + 1)
                 } else if (index == 10) {
                     // Create the adapter to convert the array to views
-                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, listOfPokemon, twoPane)
+                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, listOfPokemon, twoPane, totalPoint,
+                        dashboardViewModel, notificationsViewModel)
                 }
             },
             Response.ErrorListener { error ->
@@ -168,7 +185,7 @@ class DashboardFragment : Fragment() {
         val hp = response.getInt("hp").toString()
 
         val infoJSON = response.getJSONObject("info")
-        val id = infoJSON.getInt("id").toString()
+        val id = infoJSON.getInt("id")
         val type = infoJSON.getString("type")
         val weakness = infoJSON.getString("weakness")
         val description = infoJSON.getString("description")
@@ -194,7 +211,10 @@ class DashboardFragment : Fragment() {
     class SimpleItemRecyclerViewAdapter(
         private val parentActivity: MainActivity,
         private val values: List<Pokemon>,
-        private val twoPane: Boolean
+        private val twoPane: Boolean,
+        private var totalPoint: Int,
+        private val dashboardViewModel: DashboardViewModel,
+        private val notificationsViewModel: NotificationsViewModel
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
@@ -261,7 +281,7 @@ class DashboardFragment : Fragment() {
             Picasso.get().load(url).into(holder.cardImage)
 
             holder.name.text = item.name
-            holder.cost.text = "Cost: " + (item.id.toInt() * 100).toString() + " points."
+            holder.cost.text = "Cost: " + (item.id * 100).toString() + " points."
 
             /*with(holder.itemView) {
                 tag = item
@@ -274,6 +294,22 @@ class DashboardFragment : Fragment() {
                     putExtra("item_id", item)
                 }
                 it.context.startActivity(intent)
+            }
+
+            holder.buyButton.setOnClickListener {
+                val cost = item.id*100
+                if (totalPoint < cost) {
+                    Toast. makeText(parentActivity.getApplicationContext(),"Sorry, Not enough points.",Toast.LENGTH_LONG).show()
+                } else {
+
+                    if (notificationsViewModel.totalPokemon >= 50) {
+                        Toast. makeText(parentActivity.getApplicationContext(),"Sorry, the limit of collection list is 50 pokemons.",Toast.LENGTH_LONG).show()
+                    } else {
+                        totalPoint -= cost
+                        notificationsViewModel.addToMap(item.name, item)
+                        Toast. makeText(parentActivity.getApplicationContext(),"Great, You have bought the pokemon!!. The remaining points: " + totalPoint,Toast.LENGTH_LONG).show();
+                    }
+                }
             }
         }
 

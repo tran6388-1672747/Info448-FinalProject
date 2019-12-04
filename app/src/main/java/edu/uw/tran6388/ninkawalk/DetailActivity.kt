@@ -33,5 +33,14 @@ class DetailActivity : AppCompatActivity() {
         } catch (e: Exception) {
             item_detail_image.setImageResource(R.drawable.broken_links)
         }
+
+        detail_name.text = item?.name
+        detail_description.text = "DESCRIPTION: " + item?.description
+        detail_hp.text = "HP: " + item?.hp
+        detail_type.text = "TYPE: " + item?.type
+        detail_weakness.text = "WEAKNESS: " + item?.weakness
+
+
+
     }
 }

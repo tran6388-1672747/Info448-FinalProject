@@ -30,9 +30,8 @@ import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
+import androidx.lifecycle.ViewModelProviders
+import edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsViewModel
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -43,6 +42,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     //private var query: String? = ""
     private val QUERY_STRING: String = "search query"
     var steps = 0
+    lateinit var notificationsViewModel: NotificationsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         navView.setupWithNavController(navController)
         //findViewById<TextView>(R.id.text_display).text = "0"
         //text_display.text = "0"
+        notificationsViewModel = ViewModelProviders.of(this).get(NotificationsViewModel::class.java)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
