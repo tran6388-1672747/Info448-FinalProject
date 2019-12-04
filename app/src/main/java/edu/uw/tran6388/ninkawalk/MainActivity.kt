@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
             Log.d("onSensorChanged", "Updating Steps")
+            text_display.text = event.values[0].roundToInt().toString() + " STEPS"
             steps = event.values[0].roundToInt()
         }
     }

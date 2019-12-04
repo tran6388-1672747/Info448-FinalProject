@@ -45,8 +45,11 @@ class HomeFragment : Fragment() {
             textView.text = it
         })
         var steps = (activity as MainActivity).steps
-        if(steps != null)
+        //root.findViewById<TextView>(R.id.text_display).setText("$steps STEPS")
+        Log.e("Steps", steps.toString())
+        if (steps != null) {
             root.findViewById<TextView>(R.id.text_display).setText("$steps STEPS")
+        }
         return root
     }
 }
