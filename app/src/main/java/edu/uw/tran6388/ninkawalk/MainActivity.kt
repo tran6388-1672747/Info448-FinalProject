@@ -30,9 +30,7 @@ import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
+import edu.uw.tran6388.ninkawalk.ui.Pokemon
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -40,9 +38,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var running = false
     var sensorManager:SensorManager? = null
     var totalPoints: String? = "0"
+    var previoiusSteps = 0
     //private var query: String? = ""
     private val QUERY_STRING: String = "search query"
     var steps = 0
+    var collectionPokemon = mutableMapOf<Int, Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,6 +97,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
             Log.d("onSensorChanged", "Updating Steps")
+            score += steps - previoiusPoints
+            previousPoints = steps
             text_display.text = event.values[0].roundToInt().toString() + " STEPS"
             steps = event.values[0].roundToInt()
         }

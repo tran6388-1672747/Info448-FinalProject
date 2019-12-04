@@ -1,26 +1,16 @@
 package edu.uw.tran6388.ninkawalk.ui.dashboard
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Parcelable
 import android.util.Log
-import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.URLUtil
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.Navigation
-import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import edu.uw.tran6388.ninkawalk.R
 
@@ -33,7 +23,6 @@ import org.json.JSONObject
 import kotlinx.android.synthetic.main.one_pokemon_list.view.*
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_dashboard.*
-import edu.uw.tran6388.ninkawalk.DetailActivity
 import edu.uw.tran6388.ninkawalk.MainActivity
 
 // The helper class to be call when creating adapter.
@@ -65,14 +54,6 @@ class DashboardFragment : Fragment() {
         dashboardViewModel =
             ViewModelProviders.of(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        //val textView: TextView = root.findViewById(R.id.text_dashboard)
-        /*dashboardViewModel.text.observe(this, Observer {
-            textView.text = it
-        })*/
-
-        //Log.v("before onCreateview", (getActivity() as MainActivity).toString())
-        //Log.v("into onCreateview", getActivity().toString())
-
 
         val context = getActivity()?.getApplicationContext() as Context
         queue = Helper.dataRequestQueue(context)
@@ -120,27 +101,8 @@ class DashboardFragment : Fragment() {
             Request.Method.GET, url2, null,
             Response.Listener { response ->
 
-                //val list = DummyContent.parseNewsAPI(response)
-
-                // Set the grid column to 2 for small scene.
-                /*if (!twoPane) {
-                    val numberOfColumns = 2;
-                    recyclerView.setLayoutManager(GridLayoutManager(this, numberOfColumns))
-                }*/
-
-                // Create the adapter to convert the array to views
-                //recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, list, twoPane)
-
-                //val x = response.getJSONObject("images").getString("photo").split("/")
-
-                //textView.text = x[1]
-
                 val pokemon = parseForOnePokemon(response)
                 listOfPokemon.add(pokemon)
-
-                /*Log.v("index", index.toString())
-                Log.v("listOfPokemon", listOfPokemon[index].name)
-                Log.v("listOfPokemon", listOfPokemon[index].description)*/
 
                 Log.v("current acivity: ", getActivity().toString())
 
@@ -148,7 +110,7 @@ class DashboardFragment : Fragment() {
                     getPokemon(recyclerView, index + 1)
                 } else if (index == 10) {
                     // Create the adapter to convert the array to views
-                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane, { partItem : Pokemon -> pokemonClicked(partItem)})
+                    recyclerView.adapter = ShopAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane, { partItem : Pokemon -> pokemonClicked(partItem)})
                 }
             },
             Response.ErrorListener { error ->
@@ -163,7 +125,15 @@ class DashboardFragment : Fragment() {
         if ((activity as MainActivity).steps < (pokemon.id.toInt() * 100)){
             Toast.makeText(getActivity()?.getApplicationContext() as Context, "NOT ENOUGH POINTS", Toast.LENGTH_LONG).show()
         } else {
+            if((activity as MainActivity).collectionPokemon.containsKey(pokemon.id.toInt())){
+                var count = (activity as MainActivity).collectionPokemon[pokemon.id.toInt()]!!
+                ++count
+                (activity as MainActivity).collectionPokemon[pokemon.id.toInt()] = count
+            } else {
+                (activity as MainActivity).collectionPokemon.put(pokemon.id.toInt(), 1)
+            }
             (activity as MainActivity).steps -= (pokemon.id.toInt() * 100)
+
             updateScoreStore()
         }
 
@@ -184,7 +154,6 @@ class DashboardFragment : Fragment() {
      * https://newsapi.org/
      */
     fun parseForOnePokemon(response: JSONObject): Pokemon {
-
         val name = response.getString("name")
         val hp = response.getInt("hp").toString()
 
@@ -212,9 +181,9 @@ class DashboardFragment : Fragment() {
 
 
     // Create the adapter.
-    class SimpleItemRecyclerViewAdapter(private val parentActivity: FragmentActivity, private val values: List<Pokemon>, private val twoPane: Boolean, val clickListener: (Pokemon) -> Unit
+    class ShopAdapter(private val parentActivity: FragmentActivity, private val values: List<Pokemon>, private val twoPane: Boolean, val clickListener: (Pokemon) -> Unit
     ) :
-        RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
+        RecyclerView.Adapter<ShopAdapter.ViewHolder>() {
 
         private val onClickListener: View.OnClickListener
 
@@ -273,10 +242,6 @@ class DashboardFragment : Fragment() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             fun bind(part: Pokemon, clickListener: (Pokemon) -> Unit) {
-//                val cardImage: ImageView = view.view_image
-//                val name: TextView = view.view_name
-//                val cost: TextView = view.view_cost
-//                val buyButton: Button = view.buy_button
                 itemView.view_name.text = part.name
                 itemView.view_cost.text = "Cost: " + (part.id.toInt() * 100).toString() + " steps."
                 val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/sprites/" + part.imageURL
