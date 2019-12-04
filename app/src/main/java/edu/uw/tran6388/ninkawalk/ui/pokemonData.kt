@@ -11,7 +11,7 @@ import kotlinx.android.parcel.Parcelize
 data class Pokemon(
     val name: String,
     val description: String,
-    val id: String,
+    val id: Int,
     val hp: String,
     val type:String,
     val weakness: String,

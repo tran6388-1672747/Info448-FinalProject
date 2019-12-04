@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.fragment_home.*
 
 
 import edu.uw.tran6388.ninkawalk.MainActivity
+import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlin.math.roundToInt
 
@@ -39,18 +40,17 @@ class HomeFragment : Fragment() {
     ): View? {
         homeViewModel =
             ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        //sensorManager = getSystemService(this.SENSOR_SERVICE) as SensorManager
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val textView: TextView = root.findViewById(R.id.text_home)
         homeViewModel.text.observe(this, Observer {
             textView.text = it
         })
-        var steps = (activity as MainActivity).steps
-        //root.findViewById<TextView>(R.id.text_display).setText("$steps STEPS")
-        Log.e("Steps", steps.toString())
-        if (steps != null) {
-            root.findViewById<TextView>(R.id.text_display).setText("$steps STEPS")
-        }
+
         return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        text_display.setText((activity as MainActivity).steps.toString())
     }
 }

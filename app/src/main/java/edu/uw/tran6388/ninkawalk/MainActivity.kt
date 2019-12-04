@@ -26,11 +26,18 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
+
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import edu.uw.tran6388.ninkawalk.ui.Pokemon
+import android.os.Handler
+import android.os.ResultReceiver
+
+import androidx.lifecycle.ViewModelProviders
+import edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsViewModel
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -38,11 +45,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var running = false
     var sensorManager:SensorManager? = null
     var totalPoints: String? = "0"
-    var previoiusSteps = 0
-    //private var query: String? = ""
     private val QUERY_STRING: String = "search query"
     var steps = 0
-    var collectionPokemon = mutableMapOf<Int, Int>()
+    var previousSteps = 0
+
+    lateinit var notificationsViewModel: NotificationsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +71,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         navView.setupWithNavController(navController)
         //findViewById<TextView>(R.id.text_display).text = "0"
         //text_display.text = "0"
+        notificationsViewModel = ViewModelProviders.of(this).get(NotificationsViewModel::class.java)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -97,11 +105,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
             Log.d("onSensorChanged", "Updating Steps")
-            score += steps - previoiusPoints
-            previousPoints = steps
-            text_display.text = event.values[0].roundToInt().toString() + " STEPS"
-            steps = event.values[0].roundToInt()
+            steps += event.values[0].roundToInt() - previousSteps
+            text_display.text = steps.toString()
+            previousSteps = steps
+
+
         }
     }
-
 }
