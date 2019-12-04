@@ -13,8 +13,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
@@ -45,10 +47,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.one_pokemon_list.view.*
 import kotlinx.android.synthetic.main.pokemon_list.*
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.fragment_dashboard.*
 import org.w3c.dom.Text
 
 // The helper class to be call when creating adapter.
-class Hepler {
+class Helper {
     companion object {
         private var queue: RequestQueue? = null
 
@@ -99,12 +102,12 @@ class DashboardFragment : Fragment() {
 
 
         val context = getActivity()?.getApplicationContext() as Context
-        queue = Hepler.dataRequestQueue(context)
+        queue = Helper.dataRequestQueue(context)
 
         val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list);
         var steps = (activity as MainActivity).steps
         if(steps != null)
-            root.findViewById<TextView>(R.id.number_of_points).setText("$steps STEPS")
+            root.findViewById<TextView>(R.id.number_of_points).setText("$steps Steps")
         getListOfPokemonName(recyclerView)
 
         return root
@@ -170,7 +173,7 @@ class DashboardFragment : Fragment() {
                     getPokemon(recyclerView, index + 1)
                 } else if (index == 10) {
                     // Create the adapter to convert the array to views
-                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane)
+                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane, { partItem : Pokemon -> pokemonClicked(partItem)})
                 }
             },
             Response.ErrorListener { error ->
@@ -180,6 +183,24 @@ class DashboardFragment : Fragment() {
         )
         queue?.add(jsonObjectRequest)
     }
+
+    fun pokemonClicked(pokemon: Pokemon){
+        if ((activity as MainActivity).steps < (pokemon.id.toInt() * 100)){
+            Toast.makeText(getActivity()?.getApplicationContext() as Context, "NOT ENOUGH POINTS", Toast.LENGTH_LONG).show()
+        } else {
+            (activity as MainActivity).steps -= (pokemon.id.toInt() * 100)
+            updateScoreStore()
+        }
+
+
+    }
+
+    fun updateScoreStore(){
+        var steps = (activity as MainActivity).steps
+        number_of_points.setText("$steps Steps")
+    }
+
+
 
 
 
@@ -216,10 +237,7 @@ class DashboardFragment : Fragment() {
 
 
     // Create the adapter.
-    class SimpleItemRecyclerViewAdapter(
-        private val parentActivity: FragmentActivity,
-        private val values: List<Pokemon>,
-        private val twoPane: Boolean
+    class SimpleItemRecyclerViewAdapter(private val parentActivity: FragmentActivity, private val values: List<Pokemon>, private val twoPane: Boolean, val clickListener: (Pokemon) -> Unit
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
@@ -273,33 +291,23 @@ class DashboardFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-
-            val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/sprites/" + item.imageURL
-
-            /*holder.cardImage.setImageUrl(url, Hepler.imageLoader)
-            holder.cardImage.setDefaultImageResId(R.drawable.broken_links)
-            holder.cardImage.setErrorImageResId(R.drawable.broken_links)*/
-
-            //Log.v("image url: ", url)
-
-            Picasso.get().load(url).into(holder.cardImage)
-
-            holder.name.text = item.name
-            holder.cost.text = "Cost: " + (item.id.toInt() * 100).toString() + " points."
-
-            /*with(holder.itemView) {
-                tag = item
-                setOnClickListener(onClickListener)
-            }*/
+            holder.bind(values[position], clickListener)
         }
 
         override fun getItemCount() = values.size
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val cardImage: ImageView = view.view_image
-            val name: TextView = view.view_name
-            val cost: TextView = view.view_cost
+        class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            fun bind(part: Pokemon, clickListener: (Pokemon) -> Unit) {
+//                val cardImage: ImageView = view.view_image
+//                val name: TextView = view.view_name
+//                val cost: TextView = view.view_cost
+//                val buyButton: Button = view.buy_button
+                itemView.view_name.text = part.name
+                itemView.view_cost.text = "Cost: " + (part.id.toInt() * 100).toString() + " steps."
+                val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/sprites/" + part.imageURL
+                Picasso.get().load(url).into(itemView.view_image)
+                itemView.buy_button.setOnClickListener { clickListener(part)}
+            }
         }
     }
 }
