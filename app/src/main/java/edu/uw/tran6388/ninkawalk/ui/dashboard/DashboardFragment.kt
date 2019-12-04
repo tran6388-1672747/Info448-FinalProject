@@ -1,7 +1,5 @@
 package edu.uw.tran6388.ninkawalk.ui.dashboard
 
-import android.app.DownloadManager
-import android.content.ClipDescription
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -12,61 +10,33 @@ import android.util.LruCache
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.URLUtil
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.AuthFailureError
 import edu.uw.tran6388.ninkawalk.R
 
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.*
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import edu.uw.tran6388.ninkawalk.MainActivity
 import edu.uw.tran6388.ninkawalk.ui.Pokemon
-import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.DataInputStream
-import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.one_pokemon_list.view.*
-import kotlinx.android.synthetic.main.pokemon_list.*
 import com.squareup.picasso.Picasso
-import org.w3c.dom.Text
+import edu.uw.tran6388.ninkawalk.DetailActivity
+import edu.uw.tran6388.ninkawalk.MainActivity
 
 // The helper class to be call when creating adapter.
 class Hepler {
     companion object {
         private var queue: RequestQueue? = null
-
-        //kotlin
-        //instantiate the image loader (from Kotlin docs)
-        //params are the requestQueue and the Cache
-        val imageLoader: ImageLoader by lazy { //only instantiate when needed
-            ImageLoader(queue,
-                object : ImageLoader.ImageCache { //anonymous cache object
-                    private val cache = LruCache<String, Bitmap>(20)
-                    override fun getBitmap(url: String): Bitmap? {
-                        return cache.get(url)
-                    }
-                    override fun putBitmap(url: String, bitmap: Bitmap) {
-                        cache.put(url, bitmap)
-                    }
-                })
-        }
 
         fun dataRequestQueue(context: Context): RequestQueue? {
             queue = Volley.newRequestQueue(context)
@@ -96,6 +66,9 @@ class DashboardFragment : Fragment() {
         /*dashboardViewModel.text.observe(this, Observer {
             textView.text = it
         })*/
+
+        //Log.v("before onCreateview", (getActivity() as MainActivity).toString())
+        //Log.v("into onCreateview", getActivity().toString())
 
 
         val context = getActivity()?.getApplicationContext() as Context
@@ -164,11 +137,13 @@ class DashboardFragment : Fragment() {
                 Log.v("listOfPokemon", listOfPokemon[index].name)
                 Log.v("listOfPokemon", listOfPokemon[index].description)*/
 
+                Log.v("current acivity: ", getActivity().toString())
+
                 if (index < 10) {
                     getPokemon(recyclerView, index + 1)
                 } else if (index == 10) {
                     // Create the adapter to convert the array to views
-                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as FragmentActivity, listOfPokemon, twoPane)
+                    recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, listOfPokemon, twoPane)
                 }
             },
             Response.ErrorListener { error ->
@@ -215,7 +190,7 @@ class DashboardFragment : Fragment() {
 
     // Create the adapter.
     class SimpleItemRecyclerViewAdapter(
-        private val parentActivity: FragmentActivity,
+        private val parentActivity: MainActivity,
         private val values: List<Pokemon>,
         private val twoPane: Boolean
     ) :
@@ -290,6 +265,14 @@ class DashboardFragment : Fragment() {
                 tag = item
                 setOnClickListener(onClickListener)
             }*/
+
+            holder.detailButton.setOnClickListener {
+
+                val intent = Intent(it.context, DetailActivity::class.java).apply {
+                    putExtra("item_id", item)
+                }
+                it.context.startActivity(intent)
+            }
         }
 
         override fun getItemCount() = values.size
@@ -298,6 +281,8 @@ class DashboardFragment : Fragment() {
             val cardImage: ImageView = view.view_image
             val name: TextView = view.view_name
             val cost: TextView = view.view_cost
+            val detailButton: Button = view.btn_detail
+            val buyButton: Button = view.btn_buy
         }
     }
 }
