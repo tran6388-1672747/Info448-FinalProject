@@ -1,6 +1,8 @@
+// Joon Chang, William Fu, Jimmy Tran
+// 12/4/2019
+
 package edu.uw.tran6388.ninkawalk
 
-import android.app.Service
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -8,38 +10,19 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.android.synthetic.main.fragment_home.*
-import edu.uw.tran6388.ninkawalk.ui.home.HomeFragment
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlin.math.roundToInt
-import android.content.Intent
-import android.os.IBinder
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.os.Handler
-import android.os.ResultReceiver
-
 import androidx.lifecycle.ViewModelProviders
 import edu.uw.tran6388.ninkawalk.ui.notifications.NotificationsViewModel
-import android.R.id.edit
-import android.content.SharedPreferences
-import com.google.android.gms.tasks.Task
 import com.google.gson.Gson
 
-
+// Enables a sensor to get data from a pedometer
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     var running = false
@@ -68,22 +51,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navView.setupWithNavController(navController)
-        //findViewById<TextView>(R.id.text_display).text = "0"
-        //text_display.text = "0"
         notificationsViewModel = ViewModelProviders.of(this).get(NotificationsViewModel::class.java)
     }
 
+    // Makes a saved instance
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString(QUERY_STRING, totalPoints)
         super.onSaveInstanceState(outState)
     }
 
+    // Resumes the counting
     override fun onResume() {
         super.onResume()
         running = true
         Log.d("onResume", "START")
         var stepsSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
         if (stepsSensor == null) {
             Log.d("onResume", "No Step Counter Sensor !")
         } else {
@@ -91,15 +73,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    // Stops the sensor when a person stops
     override fun onPause() {
         super.onPause()
         running = false
         sensorManager?.unregisterListener(this)
     }
 
+    // overrides onAccuracyChanged function
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
     }
 
+    // Changes the display on home based on the number of steps a person has taken
     override fun onSensorChanged(event: SensorEvent) {
         Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
@@ -108,8 +93,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             steps += previousSteps - previousSteps2
             previousSteps2 = previousSteps
             text_display.text = steps.toString()
-
-
         }
     }
 
