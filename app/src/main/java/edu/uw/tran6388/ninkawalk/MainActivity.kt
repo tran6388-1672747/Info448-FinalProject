@@ -108,8 +108,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             steps += previousSteps - previousSteps2
             previousSteps2 = previousSteps
             text_display.text = steps.toString()
-
-
         }
     }
 
