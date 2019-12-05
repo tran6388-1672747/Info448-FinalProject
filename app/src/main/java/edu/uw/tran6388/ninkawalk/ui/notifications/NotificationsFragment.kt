@@ -48,13 +48,14 @@ class NotificationsFragment : Fragment() {
 
         //val textView: TextView = root.findViewById(R.id.text_notifications)
         if (pokemonList.isEmpty()) {
-            //textView.text = "No Pokemon in Collection"
-            val mPrefs = (activity as MainActivity).getPreferences(Context.MODE_PRIVATE)
 
+            // This section of code is to check if there is some collection data stores in the internal storage.
+            val mPrefs = (activity as MainActivity).getPreferences(Context.MODE_PRIVATE)
             val gson = Gson()
             val json = mPrefs.getString("collection_list", "")
             val notificationsViewModel2 = gson.fromJson<NotificationsViewModel>(json, NotificationsViewModel::class.java!!)
 
+            // A check condition if the data exite in the storage.
             if (notificationsViewModel2 == null) {
                 Log.v("notificationView", "null")
             } else {
@@ -66,7 +67,7 @@ class NotificationsFragment : Fragment() {
             }
             Log.v("into if: ", "into if")
         } else {
-            //textView.text = "The Collection of Pokemon"*/
+            // call the adpater to add all the pokemon
             val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list_collection)
             recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, pokemonList, twoPane, notificationsViewModel)
             Log.v("into else: ", "into else")
