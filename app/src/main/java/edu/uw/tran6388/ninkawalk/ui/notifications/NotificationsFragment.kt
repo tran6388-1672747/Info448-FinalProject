@@ -77,49 +77,6 @@ class NotificationsFragment : Fragment() {
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
-        private val onClickListener: View.OnClickListener
-
-        init {
-            onClickListener = View.OnClickListener { v ->
-                showDetailsView(v)
-            }
-        }
-
-        // method to be call by onclickListener to set listener for each fragment.
-        private fun showDetailsView(v: View) {
-            val item = v.tag as Pokemon
-            if (twoPane) {
-
-                // This is for passing the item
-                /*val fragment = ItemDetailFragment().apply {
-                    arguments = Bundle().apply {
-                        putParcelable("item_frag", item)
-                    }
-                }
-
-                parentActivity.supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.item_detail_container, fragment)
-                    .addToBackStack(null)
-                    .commit()*/
-
-                // This is for extra credit.
-                /*val frag = ItemDetailFragment.newInstance(item.headline,
-                    item.description, item.sourceName)
-
-                parentActivity.supportFragmentManager.beginTransaction()
-                    .replace(R.id.item_detail_container, frag)
-                    .addToBackStack(null)
-                    .commit()*/
-
-            } else {
-                /*val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                    putExtra("item_frag", item)
-                }
-                v.context.startActivity(intent)*/
-            }
-        }
-
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.one_pokemon_list_collection, parent, false)
@@ -136,11 +93,6 @@ class NotificationsFragment : Fragment() {
             holder.name.text = item.name
             holder.cost.text = "Cost: " + (item.id * 100).toString() + " points."
             holder.count.text = "Counts: " + notificationsViewModel.getPokemonCountByKey(item.name)
-
-            /*with(holder.itemView) {
-                tag = item
-                setOnClickListener(onClickListener)
-            }*/
 
             holder.detailButton.setOnClickListener {
 
