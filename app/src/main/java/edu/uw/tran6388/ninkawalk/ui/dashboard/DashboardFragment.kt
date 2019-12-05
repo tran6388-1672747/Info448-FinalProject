@@ -165,7 +165,8 @@ class DashboardFragment : Fragment() {
     fun updateScoreStore(){
         var steps = (activity as MainActivity).steps
         number_of_points.setText("$steps Steps")
-        (activity as MainActivity).previousSteps = steps
+
+
     }
 
     /**

@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val QUERY_STRING: String = "search query"
     var steps = 0
     var previousSteps = 0
+    var previousSteps2 = 0
 
     lateinit var notificationsViewModel: NotificationsViewModel
 
@@ -66,8 +67,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        var context = Context.SENSOR_SERVICE
-        sensorManager = getSystemService(context) as SensorManager
         navView.setupWithNavController(navController)
         //findViewById<TextView>(R.id.text_display).text = "0"
         //text_display.text = "0"
@@ -105,9 +104,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("onSensorChanged", "Sensor changed!")
         if (running) {
             Log.d("onSensorChanged", "Updating Steps")
-            steps += event.values[0].roundToInt() - previousSteps
+            previousSteps = event.values[0].roundToInt()
+            steps += previousSteps - previousSteps2
+            previousSteps2 = previousSteps
             text_display.text = steps.toString()
-            previousSteps = steps
 
 
         }
