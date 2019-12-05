@@ -10,7 +10,7 @@ import edu.uw.tran6388.ninkawalk.ui.Pokemon
 import kotlinx.android.synthetic.main.detail_activity.*
 
 /**
- * An activity representing a single Item detail screen. This
+ * An activity representing a single pokemon detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
  * in a [DetailActivity].
@@ -19,6 +19,7 @@ class DetailActivity : AppCompatActivity() {
 
     private var item: Pokemon? = null
 
+    // Create the view with all the pokemon detail from the intent by the caller.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.detail_activity)
@@ -39,8 +40,5 @@ class DetailActivity : AppCompatActivity() {
         detail_hp.text = "HP: " + item?.hp
         detail_type.text = "TYPE: " + item?.type
         detail_weakness.text = "WEAKNESS: " + item?.weakness
-
-
-
     }
 }

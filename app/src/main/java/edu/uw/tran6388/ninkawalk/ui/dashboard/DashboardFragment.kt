@@ -41,9 +41,13 @@ class Helper {
     }
 }
 
-
+/*
+This is the fragment to create a view for users to see the pokemons from the shop,
+It will make a call from the web to get all the pokemons and show them in a recycling View.
+ */
 class DashboardFragment : Fragment() {
 
+    // All the global variables to be called later for use.
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var notificationViewModel: NotificationsViewModel
     private var listOfPokemon = mutableListOf<Pokemon>()
@@ -53,6 +57,7 @@ class DashboardFragment : Fragment() {
     private var totalPoint = 0
     lateinit var notificationsViewModel: NotificationsViewModel
 
+    // The oncreateView to inflate the fragment for the shop.
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,12 +70,14 @@ class DashboardFragment : Fragment() {
 
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
+        // Call if we are in the wide view scene for phone.
         if (root.findViewById<TextView>(R.id.test_view) != null) {
             //Log.v("test_view", test_view.toString())
             twoPane = true
         }
 
 
+        // call the volley to start the queue.
         val context = getActivity()?.getApplicationContext() as Context
         queue = Helper.dataRequestQueue(context)
 
@@ -83,6 +90,7 @@ class DashboardFragment : Fragment() {
         return root
     }
 
+    // The method to call for the list of pokemon name from the web.
     private fun getListOfPokemonName(recyclerView: RecyclerView) {
         val url = "https://courses.cs.washington.edu/courses/cse154/webservices/pokedex/pokedex.php?pokedex=all"
 
@@ -98,6 +106,7 @@ class DashboardFragment : Fragment() {
                     listOfPokemonName.add(onePokemon[1])
                 }
 
+                // Call the getPokemon method to start making request to get infor fot each pokemon.
                 val i = 0
                 getPokemon(recyclerView, i)
             },
@@ -109,6 +118,7 @@ class DashboardFragment : Fragment() {
         queue?.add(stringReq)
     }
 
+    // The method to call for each pokemon by making a volley request to the UW site.
     private fun getPokemon(recyclerView: RecyclerView, index: Int) {
 
         // making a API call information for one pokemon.
@@ -121,6 +131,7 @@ class DashboardFragment : Fragment() {
                 listOfPokemon.add(pokemon)
 
 
+                // This is a recursive call, make sure to stop at 10th call.
                 if (index < 10) {
                     getPokemon(recyclerView, index + 1)
                 } else if (index == 10) {
@@ -143,6 +154,7 @@ class DashboardFragment : Fragment() {
         queue?.add(jsonObjectRequest)
     }
 
+    // The method to react when the user click the buy button in shop, it will update the steps score, and add the new pokemon to the collection.
     fun pokemonClicked(pokemon: Pokemon){
         val cost = pokemon.id*100
         if ((activity as MainActivity).steps < cost) {
@@ -160,6 +172,7 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    // Update the totalscore or total point or steps.
     fun updateScoreStore(){
         var steps = (activity as MainActivity).steps
         number_of_points.setText("$steps Steps")

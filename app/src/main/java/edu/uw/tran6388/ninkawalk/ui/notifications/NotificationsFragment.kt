@@ -1,5 +1,6 @@
 package edu.uw.tran6388.ninkawalk.ui.notifications
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import com.google.gson.Gson
 import edu.uw.tran6388.ninkawalk.ui.Pokemon
 import edu.uw.tran6388.ninkawalk.DetailActivity
 import kotlinx.android.synthetic.main.one_pokemon_list.view.btn_detail
@@ -23,11 +25,16 @@ import kotlinx.android.synthetic.main.one_pokemon_list.view.view_image
 import kotlinx.android.synthetic.main.one_pokemon_list.view.view_name
 import kotlinx.android.synthetic.main.one_pokemon_list_collection.view.*
 
+/*
+This is a fragment view that will show the collection of pokemon that the users have purchased
+from the shop. It will also show in a recycling View.
+ */
 class NotificationsFragment : Fragment() {
 
     private lateinit var notificationsViewModel: NotificationsViewModel
     private val twoPane = false
 
+    // To infated the fragment view.
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,18 +44,33 @@ class NotificationsFragment : Fragment() {
             ViewModelProviders.of(this).get(NotificationsViewModel::class.java)*/
         notificationsViewModel = (activity as MainActivity).notificationsViewModel
         val root = inflater.inflate(R.layout.fragment_notifications, container, false)
-        val pokemonList = notificationsViewModel.getPokemonList()
+        var pokemonList = notificationsViewModel.getPokemonList()
 
-        /*val textView: TextView = root.findViewById(R.id.text_notifications)
+        //val textView: TextView = root.findViewById(R.id.text_notifications)
         if (pokemonList.isEmpty()) {
-            textView.text = "No Pokemon in Collection"
+            //textView.text = "No Pokemon in Collection"
+            val mPrefs = (activity as MainActivity).getPreferences(Context.MODE_PRIVATE)
+
+            val gson = Gson()
+            val json = mPrefs.getString("collection_list", "")
+            val notificationsViewModel2 = gson.fromJson<NotificationsViewModel>(json, NotificationsViewModel::class.java!!)
+
+            if (notificationsViewModel2 == null) {
+                Log.v("notificationView", "null")
+            } else {
+                notificationsViewModel = notificationsViewModel2
+                pokemonList = notificationsViewModel.getPokemonList()
+                val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list_collection)
+                recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, pokemonList, twoPane, notificationsViewModel)
+                Log.v("into if-else: ", "into if-else")
+            }
             Log.v("into if: ", "into if")
         } else {
-            textView.text = "The Collection of Pokemon"*/
+            //textView.text = "The Collection of Pokemon"*/
             val recyclerView = root.findViewById<RecyclerView>(R.id.pokemon_list_collection)
             recyclerView.adapter = SimpleItemRecyclerViewAdapter(getActivity() as MainActivity, pokemonList, twoPane, notificationsViewModel)
             Log.v("into else: ", "into else")
-        //}
+        }
 
         return root
     }
@@ -68,6 +90,7 @@ class NotificationsFragment : Fragment() {
             return ViewHolder(view)
         }
 
+        // To bind the information of each pokemon for one item in the holder.
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
 

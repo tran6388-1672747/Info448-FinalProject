@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    // get the collection from sharerefrence.
     override fun onStart() {
         super.onStart()
 
@@ -112,6 +113,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    // Save the collection from the sharerefrence.
     override fun onStop() {
         super.onStop()
 
